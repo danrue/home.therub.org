@@ -1,0 +1,21 @@
+# Prerequisite
+# Install a system
+# Add a user
+# Add sudo
+# Grant user sudo access
+- hosts: lava
+  become: yes
+  roles:
+    - geerlingguy.docker
+  tasks:
+    - name: Update system
+      apt:
+        update_cache: yes
+        upgrade: yes
+    - name: Check if a reboot is required
+      register: file
+      stat:
+        path: /var/run/reboot-required
+    - name: Reboot if necessary
+      reboot:
+      when: file.stat.exists
