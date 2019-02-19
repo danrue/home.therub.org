@@ -3,10 +3,14 @@
 # Add a user
 # Add sudo
 # Grant user sudo access
-- hosts: lava
+- hosts:
+    - lava
+    - xeon
   become: yes
   roles:
-    - geerlingguy.docker
+    - role: geerlingguy.docker
+      docker_users:
+        - drue
   tasks:
     - name: Update system
       apt:
@@ -19,3 +23,24 @@
     - name: Reboot if necessary
       reboot:
       when: file.stat.exists
+    - name: Install system basics
+      apt:
+        name: "{{ packages }}"
+      vars:
+        packages:
+          - vim
+
+# LAVA dispatcher requires nfs-kernel-server tftpd-hpa
+
+
+- name: Set up system for drue (no sudo)
+  hosts:
+    - lava
+    - xeon
+  tasks:
+    - name: Setup system for drue
+      copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+      with_items:
+        - { src: '~/.vimrc', dest: '~/' }
