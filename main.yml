@@ -29,6 +29,7 @@
       vars:
         packages:
           - vim
+          - tmux
 
 # LAVA dispatcher requires nfs-kernel-server tftpd-hpa
 
@@ -43,4 +44,17 @@
         src: "{{ item.src }}"
         dest: "{{ item.dest }}"
       with_items:
+        - { src: '~/.bashrc', dest: '~/' }
         - { src: '~/.vimrc', dest: '~/' }
+        - { src: '~/.tmux.conf', dest: '~/' }
+
+- name: Set up LAVA hosts
+  hosts:
+    - lava
+  tasks:
+    - name: Disable rpcbind on lava hosts
+      systemd:
+        name: rpcbind.service
+        enabled: no
+      register: myres
+      failed_when: myres is failed and not 'not provided by any .service files' in myres.msg
